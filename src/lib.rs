@@ -50,7 +50,7 @@ pub unsafe extern "system" fn driver_entry(
     }
 
     let mut sym_name = UNICODE_STRING::default();
-    string_to_ustring("\\??\\Booster", &mut sym_name);
+    let _ = string_to_ustring("\\??\\Booster", &mut sym_name);
     let status = IoCreateSymbolicLink(&mut sym_name, &mut dev_name);
     if !nt_success(status) {
         println!("Error creating symbolic link 0x{:X}", status);
@@ -94,12 +94,12 @@ fn _string_to_wstring(s: &str) -> Vec<u16> {
     wstring
 }
 
-fn string_to_ustring<'a>(s: &str, uc: &'a mut UNICODE_STRING) -> &'a mut UNICODE_STRING {
+fn string_to_ustring<'a>(s: &str, uc: &'a mut UNICODE_STRING) -> Vec<u16> {
     let mut wstring: Vec<_> = s.encode_utf16().collect();
     uc.Length = wstring.len() as u16 * 2;
     uc.MaximumLength = wstring.len() as u16 * 2;
     uc.Buffer = wstring.as_mut_ptr();
-    uc
+    wstring
 }
 
 unsafe extern "C" fn boost_write(_device: *mut DEVICE_OBJECT, irp: *mut IRP) -> NTSTATUS {
